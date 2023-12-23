@@ -36,15 +36,15 @@ end
 
 # 🢙🙭🙯🙮🙬
 
-function level(s, difficulty, live, get_key)
+function level(s, level, live, get_key)
     s .= ' '
     height, width = size(s)
 
     x0 = width÷2
-    y1 = ceil(Int, (height-1)*difficulty)+1
+    y1 = ceil(Int, (height-1)*level.height)+1
     for y in 1:y1
         y_frac = (y-1)/(y1-1)
-        r = floor(Int, width*.5*difficulty*(1 - 0.5y_frac^2))
+        r = floor(Int, width*.5*level.width*(1 - 0.5y_frac^2))
         s[y, x0-r:x0+r] .= '🙯'
     end
 
@@ -54,12 +54,12 @@ function level(s, difficulty, live, get_key)
     render(s)
 
     action_cooldown = 0
-    bullet_cost = 5
+    bullet_cost = level.bullet_cost
     move_cost = 1
 
     enemy_cooldown = 0
     enemy_direction = rand((-1, 1))
-    enemy_cost = 3
+    enemy_cost = level.enemy_cost
 
     new_map = copy(s)
     while live[]
@@ -144,21 +144,31 @@ function level(s, difficulty, live, get_key)
 
         render(s)
         live[] || break
-        sleep(.03)
+        sleep(level.tick_rate) # TODO be more precise
     end
 end
-
 
 function main(;difficulty=.4, splash=true)
     s = Screen()
     
     splash && intro(s)
 
-    difficulties = LinRange(.3, .6, 2)
+    levels = [
+        (width=.3, height=.3, bullet_cost=4, enemy_cost=4, tick_rate=.06),
+        (width=.35, height=.35, bullet_cost=5, enemy_cost=4, tick_rate=.05),
+        (width=.4, height=.4, bullet_cost=5, enemy_cost=3, tick_rate=.04),
+        (width=.45, height=.45, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+        (width=.45, height=.55, bullet_cost=5, enemy_cost=3, tick_rate=.02),
+        (width=.45, height=.6, bullet_cost=5, enemy_cost=3, tick_rate=.015),
+        (width=.9, height=.1, bullet_cost=5, enemy_cost=3, tick_rate=.015),
+        (width=.1, height=.8, bullet_cost=5, enemy_cost=3, tick_rate=.015),
+        (width=.45, height=.7, bullet_cost=5, enemy_cost=3, tick_rate=.01),
+        (width=.45, height=.7, bullet_cost=4, enemy_cost=2, tick_rate=.01),
+    ]
 
     Keyboard.listen() do live, get_key
-        for (lvl, dif) in enumerate(difficulties)
-            result = level(s, dif, live, get_key)
+        for lvl in levels
+            result = level(s, lvl, live, get_key)
             render(s)
             sleep(.1)
             result === nothing && return
