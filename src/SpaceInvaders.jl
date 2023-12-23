@@ -152,7 +152,7 @@ function main(;difficulty=.4, splash=true)
     
     splash && intro(s)
 
-    difficulties = LinRange(.3, .6, 10)
+    difficulties = LinRange(.3, .6, 2)
 
     Keyboard.listen() do live, get_key
         for (lvl, dif) in enumerate(difficulties)
@@ -162,8 +162,8 @@ function main(;difficulty=.4, splash=true)
             result === nothing && return
             result === false && (println("Game over!"); return)
         end
+        println("Win!")
     end
-    println("Win!")
 end
 
 
