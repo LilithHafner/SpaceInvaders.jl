@@ -96,6 +96,7 @@ function level(s, difficulty, live, get_key)
                     if y > 1
                         if new_map[y-1, x] == '🙯'
                             new_map[y-1, x] = ' '
+                            bell(s)
                         else
                             new_map[y-1, x] = '🢙'
                         end
@@ -111,6 +112,7 @@ function level(s, difficulty, live, get_key)
                     new_map[height-1, ship_x] = '🢙'
                 else
                     new_map[height-1, ship_x] = ' '
+                    bell(s)
                 end
                 action_cooldown = bullet_cost-1
             elseif k == 2 # Left

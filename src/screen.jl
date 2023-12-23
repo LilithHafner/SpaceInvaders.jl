@@ -2,17 +2,21 @@
 # and this gives us the standard Julia matrix indexing
 # initialize to '\0', representing unknown
 struct Screen <: AbstractMatrix{Char}
-    display_state::Matrix{Char}
     buffer::Matrix{Char}
+    display_state::Matrix{Char}
+    bell::Ref{Bool}
 end
+
+Screen(buffer::Matrix{Char}, display_state::Matrix{Char}) = Screen(buffer, display_state, Ref(false))
+Screen(buffer::Matrix{Char}) = Screen(copy(buffer), buffer)
+Screen() = Screen(fill('\0', 24, 80))
 
 Base.IndexStyle(::Type{<:Screen}) = IndexLinear()
 Base.getindex(s::Screen, i::Int) = s.buffer[i]
 Base.setindex!(s::Screen, v::Char, i::Int) = setindex!(s.buffer, v, i)
 Base.size(s::Screen) = size(s.buffer)
 
-Screen(buffer::Matrix{Char}) = Screen(copy(buffer), buffer)
-Screen() = Screen(fill('\0', 24, 80))
+bell(s::Screen) = s.bell[] = true
 
 render(s::Screen) = render(stdout, s)
 function render(io::IO, s::Screen)
@@ -30,6 +34,10 @@ function render(io::IO, s::Screen)
     end
     move_cursor(iob, (size(s, 1), 1) .- cursor)
     copyto!(s.display_state, s.buffer)
+    if s.bell[]
+        write(iob, '\a')
+        s.bell[] = false
+    end
     println(io, String(take!(iob)))
 end
 
