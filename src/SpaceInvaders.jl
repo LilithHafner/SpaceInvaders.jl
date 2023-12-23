@@ -158,12 +158,12 @@ function main(;difficulty=.4, splash=true)
         (width=.35, height=.35, bullet_cost=5, enemy_cost=4, tick_rate=.05),
         (width=.4, height=.4, bullet_cost=5, enemy_cost=3, tick_rate=.04),
         (width=.45, height=.45, bullet_cost=5, enemy_cost=3, tick_rate=.03),
-        (width=.45, height=.55, bullet_cost=5, enemy_cost=3, tick_rate=.02),
-        (width=.45, height=.6, bullet_cost=5, enemy_cost=3, tick_rate=.015),
-        (width=.9, height=.1, bullet_cost=5, enemy_cost=3, tick_rate=.015),
-        (width=.1, height=.8, bullet_cost=5, enemy_cost=3, tick_rate=.015),
-        (width=.45, height=.7, bullet_cost=5, enemy_cost=3, tick_rate=.01),
-        (width=.45, height=.7, bullet_cost=4, enemy_cost=2, tick_rate=.01),
+        (width=.9, height=.2, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+        (width=.15, height=.85, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+        (width=.45, height=.5, bullet_cost=5, enemy_cost=3, tick_rate=.02),
+        (width=.45, height=.55, bullet_cost=5, enemy_cost=3, tick_rate=.015),
+        (width=.45, height=.6, bullet_cost=5, enemy_cost=3, tick_rate=.01),
+        (width=.45, height=.65, bullet_cost=5, enemy_cost=3, tick_rate=.007),
     ]
 
     Keyboard.listen() do live, get_key
