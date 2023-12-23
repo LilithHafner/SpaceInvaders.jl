@@ -5,8 +5,7 @@ export main
 include("screen.jl")
 include("keyboard.jl")
 
-function intro()
-    s = Screen()
+function intro(s)
     height, width = size(s)
     reserve = collect(1:height)
     live = zeros(Int, height)
@@ -36,8 +35,8 @@ function intro()
 end
 
 # 🢙🙭🙯🙮🙬
-function main(;difficulty=.2, splash=true)
-    s = splash ? intro() : Screen()
+
+function level(s, difficulty, live, get_key)
     s .= ' '
     height, width = size(s)
 
@@ -55,93 +54,116 @@ function main(;difficulty=.2, splash=true)
     render(s)
 
     action_cooldown = 0
-    bullet_cost = 6
-    move_cost = 2
+    bullet_cost = 5
+    move_cost = 1
 
     enemy_cooldown = 0
     enemy_direction = rand((-1, 1))
-    enemy_cost = 4
+    enemy_cost = 3
 
     new_map = copy(s)
-    Keyboard.listen() do live, get_key
-        while live[]
-            k = get_key()
+    while live[]
+        k = get_key()
 
-            new_map .= ' '
+        new_map .= ' '
 
-            # Enemies
-            edy, edx = if enemy_cooldown <= 0
-                enemy_cooldown = enemy_cost - 1
-                last_col = enemy_direction == 1 ? width : 1
-                reverse = any(==('🙯'), view(s, :, last_col))
-                reverse && (enemy_direction *= -1)
-                (reverse, enemy_direction)
-            else
-                enemy_cooldown -= 1
-                (0,0)
+        # Enemies
+        edy, edx = if enemy_cooldown <= 0
+            enemy_cooldown = enemy_cost - 1
+            last_col = enemy_direction == 1 ? width : 1
+            reverse = any(==('🙯'), view(s, :, last_col))
+            reverse && (enemy_direction *= -1)
+            (reverse, enemy_direction)
+        else
+            enemy_cooldown -= 1
+            (0,0)
+        end
+        enemies = false
+        for x in 1:width, y in 1:height
+            if s[y, x] == '🙯'
+                enemies = true
+                y2 = y + edy
+                x2 = x + edx
+                1 ≤ y2 ≤ height && 1 ≤ x2 ≤ width || continue # leave map is okay
+                new_map[y2, x2] = '🙯'
             end
-            for x in 1:width, y in 1:height
-                if s[y, x] == '🙯'
-                    y2 = y + edy
-                    x2 = x + edx
-                    1 ≤ y2 ≤ height && 1 ≤ x2 ≤ width || continue # leave map is okay
-                    new_map[y2, x2] = '🙯'
-                end
-            end
+        end
 
-            # Bullets
-            for x in 1:width
-                for y in 1:height
-                    if s[y, x] == '🢙'
-                        if y > 1
-                            if new_map[y-1, x] == '🙯'
-                                new_map[y-1, x] = ' '
-                            else
-                                new_map[y-1, x] = '🢙'
-                            end
+        # Bullets
+        for x in 1:width
+            for y in 1:height
+                if s[y, x] == '🢙'
+                    if y > 1
+                        if new_map[y-1, x] == '🙯'
+                            new_map[y-1, x] = ' '
+                        else
+                            new_map[y-1, x] = '🢙'
                         end
                     end
                 end
             end
+        end
 
-            # Act
-            if action_cooldown <= 0
-                if k == 1 # Fire
-                    if new_map[height-1, ship_x] == ' '
-                        new_map[height-1, ship_x] = '🢙'
-                    else
-                        new_map[height-1, ship_x] = ' '
-                    end
-                    action_cooldown = bullet_cost-1
-                elseif k == 2 # Left
-                    if ship_x > 1
-                        ship_x -= 1
-                    end
-                    action_cooldown = move_cost-1
-                elseif k == 3 # Right
-                    if ship_x < width
-                        ship_x += 1
-                    end
-                    action_cooldown = move_cost-1
+        # Act
+        if action_cooldown <= 0
+            if k == 1 && enemies # Fire
+                if new_map[height-1, ship_x] == ' '
+                    new_map[height-1, ship_x] = '🢙'
                 else
-                    action_cooldown = 0
+                    new_map[height-1, ship_x] = ' '
                 end
+                action_cooldown = bullet_cost-1
+            elseif k == 2 # Left
+                if ship_x > 1
+                    ship_x -= 1
+                end
+                action_cooldown = move_cost-1
+            elseif k == 3 # Right
+                if ship_x < width
+                    ship_x += 1
+                end
+                action_cooldown = move_cost-1
             else
-                action_cooldown -= 1
+                action_cooldown = 0
             end
-            if new_map[height, ship_x] == '🙯'
-                live[] = false
-            else
-                new_map[height, ship_x] = '🙭'
-            end
-
+        else
+            action_cooldown -= 1
+        end
+        if new_map[height, ship_x] == '🙯'
             copyto!(s, new_map)
+            return false
+        else
+            new_map[height, ship_x] = '🙭'
+        end
+
+        copyto!(s, new_map)
+
+        any(∈(('🙯','🢙')), new_map) || return true
+
+        render(s)
+        live[] || break
+        sleep(.03)
+    end
+end
+
+
+function main(;difficulty=.4, splash=true)
+    s = Screen()
+    
+    splash && intro(s)
+
+    difficulties = LinRange(.3, .6, 10)
+
+    Keyboard.listen() do live, get_key
+        for (lvl, dif) in enumerate(difficulties)
+            result = level(s, dif, live, get_key)
             render(s)
-            live[] || break
-            sleep(.03)
+            sleep(.1)
+            result === nothing && return
+            result === false && (println("Game over!"); return)
         end
     end
-
+    println("Win!")
 end
 
 
