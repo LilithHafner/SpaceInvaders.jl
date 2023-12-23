@@ -1,23 +1,28 @@
-# TODO: optimize responsiveness
 module Keyboard
     # public listen
 
     const KEY = Threads.Atomic{UInt64}(0)
     const LIVE = Threads.Atomic{Bool}(false)
     function get_key()
-        old = KEY[]
-        while true
-            # Each additional iteration consumes one write from elsewhere.
-            # As long as folks aren't writing extremely frequently, this
-            # will terminate within a few iterations.
-            old & typemax(UInt32) == 0 && return zero(UInt32)
-            new = Threads.atomic_cas!(KEY, old, old-1)
-            new === old && return UInt32(old >> 32)
-            old = new
+        k = KEY[]
+        time_mask = (typemax(UInt64) >> 3)
+        t0 = k & time_mask
+        is_initial = (k & (time_mask + 1)) != 0
+        t1 = time_ns() & time_mask
+
+        delta = is_initial ? 5*10^8 : 5*10^7 # 500ms : 50ms
+
+        if t0 ≤ t1 < t0 + delta
+            return Int(k >> 62)
+        else
+            return 0
         end
     end
-    function set_key(k, fuel=15)
-        KEY[] = UInt64(k) << 32 + UInt32(fuel)
+    function set_key(k)
+        old = KEY[]
+        t = time_ns() & (typemax(UInt64) >> 3)
+        is_initial = k != (old >> 62)
+        KEY[] = (UInt64(k) << 62) + t + (UInt64(is_initial) << 61)
     end
     function listen(f)
         ret = ccall(:jl_tty_set_mode, Int32, (Ptr{Cvoid},Int32), stdin.handle, true)
