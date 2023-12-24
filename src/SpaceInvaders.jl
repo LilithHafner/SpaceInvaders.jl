@@ -18,7 +18,6 @@ function intro(s, background=fill(' ', size(s)))
     height, width = size(s)
     reserve = collect(1:height)
     live = zeros(Int, height)
-    i = 0
     while !all(==(width+2)∘abs, live)
         if !isempty(reserve)
             draft = popat!(reserve, rand(eachindex(reserve)))
@@ -37,8 +36,7 @@ function intro(s, background=fill(' ', size(s)))
             end
         end
         render(s)
-        sleep(.03)
-        i += 1
+        sleep(.01)
     end
     s
 end
@@ -71,6 +69,7 @@ function level(s, level, live, get_key)
     enemy_cost = level.enemy_cost
 
     new_map = copy(s)
+    target = time() + level.tick_rate
     while live[]
         k = get_key()
 
@@ -153,7 +152,8 @@ function level(s, level, live, get_key)
 
         render(s)
         live[] || break
-        sleep(level.tick_rate) # TODO be more precise
+        sleep(max(.005, target - time()))
+        target = max(target + level.tick_rate, time())
     end
 end
 
