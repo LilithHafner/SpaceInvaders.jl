@@ -21,7 +21,7 @@ function draw_text(s::AbstractMatrix{Char}, y::Integer, str::AbstractString)
 end
 function draw_text(s::AbstractMatrix{Char}, str::AbstractString)
     lines = split(str, '\n')
-    y = size(s, 1)÷2 - 3*length(lines)
+    y = (sum(extrema(axes(s, 1)))+1)÷2 - 3*length(lines)
     for line in lines
         draw_text(s, y, line)
         y += 6

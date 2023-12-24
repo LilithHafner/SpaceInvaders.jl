@@ -163,7 +163,7 @@ function main(;splash=true)
 
         if splash
             bg = fill(' ', size(s))
-            draw_text(bg, "SPACE\nINVADERS!")
+            draw_text(@view(bg[2:end, 2:end-1]), "SPACE\nINVADERS!")
             frame(bg)
             intro(s, bg)
             sleep(1)
