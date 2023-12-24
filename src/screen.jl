@@ -9,7 +9,7 @@ end
 
 Screen(buffer::Matrix{Char}, display_state::Matrix{Char}) = Screen(buffer, display_state, Ref(false))
 Screen(buffer::Matrix{Char}) = Screen(copy(buffer), buffer)
-Screen() = Screen(fill('\0', 24, 80))
+Screen() = Screen(fill('\0', displaysize(stdout)))
 
 Base.IndexStyle(::Type{<:Screen}) = IndexLinear()
 Base.getindex(s::Screen, i::Int) = s.buffer[i]
