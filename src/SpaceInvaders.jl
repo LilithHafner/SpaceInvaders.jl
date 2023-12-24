@@ -157,35 +157,35 @@ function level(s, level, live, get_key)
     end
 end
 
-function main(;difficulty=.4, splash=true)
-    s = Screen()
-    
-    if splash
-        bg = fill(' ', size(s))
-        draw_text(bg, "SPACE\nINVADERS!")
-        frame(bg)
-        intro(s, bg)
-        sleep(1)
-    else
-        frame(s)
-    end
-
-    s = @view s[2:end, 2:end-1]
-
-    levels = [
-        (width=.3, height=.3, bullet_cost=4, enemy_cost=4, tick_rate=.06),
-        (width=.35, height=.35, bullet_cost=5, enemy_cost=4, tick_rate=.05),
-        (width=.4, height=.4, bullet_cost=5, enemy_cost=3, tick_rate=.04),
-        (width=.45, height=.45, bullet_cost=5, enemy_cost=3, tick_rate=.03),
-        (width=.9, height=.2, bullet_cost=5, enemy_cost=3, tick_rate=.03),
-        (width=.15, height=.85, bullet_cost=5, enemy_cost=3, tick_rate=.03),
-        (width=.45, height=.5, bullet_cost=5, enemy_cost=3, tick_rate=.02),
-        (width=.45, height=.55, bullet_cost=5, enemy_cost=3, tick_rate=.015),
-        (width=.45, height=.6, bullet_cost=5, enemy_cost=3, tick_rate=.01),
-        (width=.45, height=.65, bullet_cost=5, enemy_cost=3, tick_rate=.007),
-    ]
-
+function main(;splash=true)
     Keyboard.listen() do live, get_key
+        s = Screen()
+
+        if splash
+            bg = fill(' ', size(s))
+            draw_text(bg, "SPACE\nINVADERS!")
+            frame(bg)
+            intro(s, bg)
+            sleep(1)
+        else
+            frame(s)
+        end
+
+        s = @view s[2:end, 2:end-1]
+
+        levels = [
+            (width=.3, height=.3, bullet_cost=4, enemy_cost=4, tick_rate=.06),
+            (width=.35, height=.35, bullet_cost=5, enemy_cost=4, tick_rate=.05),
+            (width=.4, height=.4, bullet_cost=5, enemy_cost=3, tick_rate=.04),
+            (width=.45, height=.45, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+            (width=.9, height=.2, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+            (width=.15, height=.85, bullet_cost=5, enemy_cost=3, tick_rate=.03),
+            (width=.45, height=.5, bullet_cost=5, enemy_cost=3, tick_rate=.02),
+            (width=.45, height=.53, bullet_cost=5, enemy_cost=3, tick_rate=.015),
+            (width=.45, height=.56, bullet_cost=5, enemy_cost=3, tick_rate=.01),
+            (width=.45, height=.6, bullet_cost=5, enemy_cost=3, tick_rate=.007),
+        ]
+
         for (i, spec) in enumerate(levels)
             result = level(s, spec, live, get_key)
             if result === nothing return
