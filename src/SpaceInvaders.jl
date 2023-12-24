@@ -3,6 +3,15 @@ module SpaceInvaders
 using Compat # for `stack``
 export main
 
+"""
+    main()
+
+Launch space invaders.
+
+Requires a terminal with support for ANSI escape codes for cursor movement.
+"""
+main() = _main()
+
 include("screen.jl")
 include("keyboard.jl")
 include("text.jl")
@@ -158,7 +167,7 @@ function level(s, level, live, get_key)
     end
 end
 
-function main(;splash=true)
+function _main(;splash=true)
     Keyboard.listen() do live, get_key
         s = Screen()
 
