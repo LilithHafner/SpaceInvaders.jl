@@ -17,8 +17,10 @@ Base.setindex!(s::Screen, v::Char, i::Int) = setindex!(s.buffer, v, i)
 Base.size(s::Screen) = size(s.buffer)
 
 bell(s::Screen) = s.bell[] = true
+bell(s::SubArray) = bell(s.parent)
 
-render(s::Screen) = render(stdout, s)
+render(s) = render(stdout, s)
+render(io::IO, s::SubArray) = render(io, s.parent)
 function render(io::IO, s::Screen)
     cursor = (size(s, 1)+1, 1)
     iob = IOBuffer()

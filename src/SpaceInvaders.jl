@@ -6,6 +6,14 @@ include("screen.jl")
 include("keyboard.jl")
 include("text.jl")
 
+function frame(s)
+    s[1,1] = '╔'
+    s[1,end] = '╗'
+    s[1,2:end-1] .= '═'
+    s[2:end,1] .= '║'
+    s[2:end,end] .= '║'
+end
+
 function intro(s, background=fill(' ', size(s)))
     height, width = size(s)
     reserve = collect(1:height)
@@ -155,9 +163,14 @@ function main(;difficulty=.4, splash=true)
     if splash
         bg = fill(' ', size(s))
         draw_text(bg, "SPACE\nINVADERS!")
+        frame(bg)
         intro(s, bg)
         sleep(1)
+    else
+        frame(s)
     end
+
+    s = @view s[2:end, 2:end-1]
 
     levels = [
         (width=.3, height=.3, bullet_cost=4, enemy_cost=4, tick_rate=.06),
