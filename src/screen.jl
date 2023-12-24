@@ -22,7 +22,7 @@ bell(s::SubArray) = bell(s.parent)
 render(s) = render(stdout, s)
 render(io::IO, s::SubArray) = render(io, s.parent)
 function render(io::IO, s::Screen)
-    cursor = (size(s, 1)+1, 1)
+    cursor = (size(s, 1), 1)
     iob = IOBuffer()
     for y in axes(s, 1)
         for x in axes(s, 2)
@@ -40,7 +40,8 @@ function render(io::IO, s::Screen)
         write(iob, '\a')
         s.bell[] = false
     end
-    println(io, String(take!(iob)))
+    print(io, String(take!(iob)))
+    flush(io)
 end
 
 str(n) = n == 1 ? "" : "$n"
