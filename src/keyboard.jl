@@ -28,7 +28,13 @@ module Keyboard
         ret = ccall(:jl_tty_set_mode, Int32, (Ptr{Cvoid},Int32), stdin.handle, true)
         ret == 0 || error("unable to switch to raw mode")
         LIVE[] = true
-        Threads.@spawn _listen()
+
+        @static if VERSION < v"1.3.0"
+            @async _listen()
+        else
+            Threads.@spawn _listen()
+        end
+
         try
             f(LIVE, get_key)
         finally

@@ -1,5 +1,6 @@
 module SpaceInvaders
 
+using Compat # for `stack``
 export main
 
 include("screen.jl")
