@@ -4,8 +4,9 @@ export main
 
 include("screen.jl")
 include("keyboard.jl")
+include("text.jl")
 
-function intro(s)
+function intro(s, background=fill(' ', size(s)))
     height, width = size(s)
     reserve = collect(1:height)
     live = zeros(Int, height)
@@ -22,7 +23,7 @@ function intro(s)
                     s[y, mod(x, width+1)] = x > 0 ? '🙮' : '🙬'
                 end
                 if abs(x) > 1
-                    s[y, mod(x-sign(x), width+1)] = ' '
+                    s[y, mod(x-sign(x), width+1)] = background[y, mod(x-sign(x), width+1)]
                 end
                 live[y] += sign(x)
             end
@@ -151,7 +152,12 @@ end
 function main(;difficulty=.4, splash=true)
     s = Screen()
     
-    splash && intro(s)
+    if splash
+        bg = fill(' ', size(s))
+        draw_text(bg, "SPACE\nINVADERS!")
+        intro(s, bg)
+        sleep(1)
+    end
 
     levels = [
         (width=.3, height=.3, bullet_cost=4, enemy_cost=4, tick_rate=.06),
@@ -167,16 +173,26 @@ function main(;difficulty=.4, splash=true)
     ]
 
     Keyboard.listen() do live, get_key
-        for lvl in levels
-            result = level(s, lvl, live, get_key)
-            render(s)
-            sleep(.1)
-            result === nothing && return
-            result === false && (println("Game over!"); return)
+        for (i, spec) in enumerate(levels)
+            result = level(s, spec, live, get_key)
+            if result === nothing return
+                break
+            elseif result
+                if i == length(levels)
+                    draw_text(s, "YOU\nWIN!")
+                    render(s)
+                    break
+                end
+                draw_text(s, "LEVEL $(i+1)")
+                render(s)
+                sleep(2)
+            else
+                draw_text(s, "GAME\nOVER!")
+                render(s)
+                break
+            end
         end
-        println("Win!")
     end
 end
-
 
 end
