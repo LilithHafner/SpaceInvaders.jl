@@ -24,17 +24,27 @@ function frame(s)
     s[2:end,end] .= '║'
 end
 
-function intro(s, background=fill(' ', size(s)))
+function ticker(delay)
+    delay, time() + delay
+end
+function tick((delay, target))
+    sleep(max(.005, target - time()))
+    delay, max(target + delay, time())
+end
+
+function intro(live, s, background=fill(' ', size(s)), total_time=1.5)
     height, width = size(s)
     reserve = collect(1:height)
-    live = zeros(Int, height)
-    while !all(==(width+2)∘abs, live)
+    active = zeros(Int, height)
+    println(total_time / (width+height))
+    t = ticker(total_time / (width+height))
+    while live[] && !all(==(width+2)∘abs, active)
         if !isempty(reserve)
             draft = popat!(reserve, rand(eachindex(reserve)))
-            live[draft] = rand((-1, 1))
+            active[draft] = rand((-1, 1))
         end
-        for y in eachindex(live)
-            x = live[y]
+        for y in eachindex(active)
+            x = active[y]
             if 0 < abs(x) < width+2
                 if abs(x) < width+1
                     s[y, mod(x, width+1)] = x > 0 ? '🙮' : '🙬'
@@ -42,11 +52,12 @@ function intro(s, background=fill(' ', size(s)))
                 if abs(x) > 1
                     s[y, mod(x-sign(x), width+1)] = background[y, mod(x-sign(x), width+1)]
                 end
-                live[y] += sign(x)
+                active[y] += sign(x)
             end
         end
         render(s)
-        sleep(.01)
+        live[] || break
+        t = tick(t)
     end
     s
 end
@@ -79,7 +90,7 @@ function level(s, level, live, get_key)
     enemy_cost = level.enemy_cost
 
     new_map = copy(s)
-    target = time() + level.tick_rate
+    t = ticker(level.tick_rate)
     while live[]
         k = get_key()
 
@@ -162,8 +173,7 @@ function level(s, level, live, get_key)
 
         render(s)
         live[] || break
-        sleep(max(.005, target - time()))
-        target = max(target + level.tick_rate, time())
+        t = tick(t)
     end
 end
 
@@ -175,11 +185,16 @@ function _main(;splash=true)
             bg = fill(' ', size(s))
             draw_text(@view(bg[2:end, 2:end-1]), "SPACE\nINVADERS!")
             frame(bg)
-            intro(s, bg)
-            sleep(1)
+            intro(live, s, bg)
+            t0 = time()
+            while live[] && time() < t0 + 1
+                sleep(.01)
+            end
         else
             frame(s)
         end
+
+        live[] || return
 
         s = @view s[2:end, 2:end-1]
 
