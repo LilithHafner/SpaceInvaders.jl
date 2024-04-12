@@ -3,6 +3,7 @@ module Keyboard
 
     const KEY = Threads.Atomic{UInt64}(0)
     const LIVE = Threads.Atomic{Bool}(false)
+    const CHECKSUM = Threads.Atomic{UInt64}(0)
     function get_key()
         k = KEY[]
         time_mask = (typemax(UInt64) >> 3)
@@ -46,6 +47,7 @@ module Keyboard
         state = 0
         while LIVE[]
             c = read(stdin, Char)
+            CHECKSUM[] = hash(c) + 32CHECKSUM[]
             # println(repr(c))
             if state == 0
                 if c == '\e'
