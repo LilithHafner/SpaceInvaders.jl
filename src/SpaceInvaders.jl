@@ -136,11 +136,11 @@ function level(s, level, live, get_key)
         # Act
         if action_cooldown <= 0
             if k == 1 && enemies # Fire
+                bell(s)
                 if new_map[height-1, ship_x] == ' '
                     new_map[height-1, ship_x] = '🢙'
                 else
                     new_map[height-1, ship_x] = ' '
-                    bell(s)
                 end
                 action_cooldown = bullet_cost-1
             elseif k == 2 # Left
